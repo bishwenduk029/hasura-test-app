@@ -29,7 +29,7 @@ export default function Home(props) {
   return (
     <div className="container">
       <Head>
-        <title>Hasura Test App</title>
+        <title>Hasura Test Apps</title>
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
