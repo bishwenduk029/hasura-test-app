@@ -2,6 +2,6 @@
     "name": "hasura-test-app",
     "version": 1,
     "env": {
-        "MONGODB_URI": "@mongodb-uri"
+        "MONGODB_URI": "@mongodb_uri"
     }
 }
