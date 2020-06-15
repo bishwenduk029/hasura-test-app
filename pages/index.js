@@ -2,7 +2,10 @@ import { useState } from "react";
 import useSWR from "swr";
 import Head from "next/head";
 
-const API_URL = "/api/restaurants";
+const API_URL =
+  process.env.NODE_ENV === "production"
+    ? "https://hasura-test-app.vercel.app/api/restaurants"
+    : "http://localhost:3000/api/restaurants";
 
 async function fetchRestaurants(url) {
   const response = await fetch(url);
