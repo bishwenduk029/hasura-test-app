@@ -2,7 +2,7 @@ import { useState } from "react";
 import useSWR from "swr";
 import Head from "next/head";
 
-const API_URL = "http://localhost:3000/api/restaurants";
+const API_URL = "/api/restaurants";
 
 async function fetchRestaurants(url) {
   const response = await fetch(url);
@@ -263,7 +263,7 @@ export default function Home(props) {
   );
 }
 
-export async function getStaticProps() {
+export async function getServerSideProps() {
   const data = await fetchRestaurants(`${API_URL}?offset=0&size=10`);
   return {
     props: {
