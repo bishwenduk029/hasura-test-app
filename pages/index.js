@@ -1,6 +1,31 @@
-import Head from 'next/head'
+import { useState } from "react";
+import useSWR from "swr";
+import Head from "next/head";
 
-export default function Home() {
+const API_URL = "http://localhost:3000/api/restaurants";
+
+async function fetchRestaurants(url) {
+  const response = await fetch(url);
+  const data = await response.json();
+  return data;
+}
+
+export default function Home(props) {
+  const initialData = props.data;
+  let restaurants = [];
+  const [offset, setoffset] = useState(0);
+  const { data } = useSWR(
+    offset !== 0 ? `${API_URL}?offset=${offset}&size=${5}` : null,
+    fetchRestaurants,
+    { initialData }
+  );
+  if (data) {
+    console.log(data);
+    restaurants = [...restaurants, ...data.restaurants];
+  } else {
+    restaurants = initialData.restaurants;
+  }
+
   return (
     <div className="container">
       <Head>
@@ -10,41 +35,39 @@ export default function Home() {
 
       <main>
         <h1 className="title">
-          Welcome to <a href="https://nextjs.org">Next.js!</a>
+          Welcome to <a href="https://hasura.io/">Hasura Test App!</a>
         </h1>
+        <p>List of Restaurants</p>
 
-        <p className="description">
-          Get started by editing <code>pages/index.js</code>
-        </p>
+        <div>
+          <table id="table">
+            <thead>
+              <tr>
+                {Object.keys(restaurants[0]).map((header) => (
+                  <th key={header}>{header}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {restaurants.map((restaurant) => (
+                <tr key={restaurant._id}>
+                  {Object.keys(restaurant).map((columnName) => {
+                    if (Array.isArray(restaurant[columnName])) {
+                      return <td>{restaurant[columnName][0].grade}</td>;
+                    }
 
-        <div className="grid">
-          <a href="https://nextjs.org/docs" className="card">
-            <h3>Documentation &rarr;</h3>
-            <p>Find in-depth information about Next.js features and API.</p>
-          </a>
+                    if (typeof restaurant[columnName] === "object") {
+                      return (
+                        <td>{`${restaurant[columnName].building}, ${restaurant[columnName].street} - ${restaurant[columnName].zipcode}`}</td>
+                      );
+                    }
 
-          <a href="https://nextjs.org/learn" className="card">
-            <h3>Learn &rarr;</h3>
-            <p>Learn about Next.js in an interactive course with quizzes!</p>
-          </a>
-
-          <a
-            href="https://github.com/vercel/next.js/tree/master/examples"
-            className="card"
-          >
-            <h3>Examples &rarr;</h3>
-            <p>Discover and deploy boilerplate example Next.js projects.</p>
-          </a>
-
-          <a
-            href="https://vercel.com/import?filter=next.js&utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className="card"
-          >
-            <h3>Deploy &rarr;</h3>
-            <p>
-              Instantly deploy your Next.js site to a public URL with Vercel.
-            </p>
-          </a>
+                    return <td>{restaurant[columnName]}</td>;
+                  })}
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       </main>
 
@@ -54,7 +77,7 @@ export default function Home() {
           target="_blank"
           rel="noopener noreferrer"
         >
-          Powered by{' '}
+          Powered by{" "}
           <img src="/vercel.svg" alt="Vercel Logo" className="logo" />
         </a>
       </footer>
@@ -67,6 +90,38 @@ export default function Home() {
           flex-direction: column;
           justify-content: center;
           align-items: center;
+        }
+
+        .table {
+          text-align: left;
+        }
+
+        #table {
+          font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+          border-collapse: collapse;
+          width: 100%;
+        }
+
+        #table td,
+        #table th {
+          border: 1px solid #ddd;
+          padding: 8px;
+        }
+
+        #table tr:nth-child(even) {
+          background-color: #f2f2f2;
+        }
+
+        #table tr:hover {
+          background-color: #ddd;
+        }
+
+        #table th {
+          padding-top: 12px;
+          padding-bottom: 12px;
+          text-align: left;
+          background-color: grey;
+          color: white;
         }
 
         main {
@@ -205,5 +260,14 @@ export default function Home() {
         }
       `}</style>
     </div>
-  )
+  );
+}
+
+export async function getStaticProps() {
+  const data = await fetchRestaurants(`${API_URL}?offset=0&size=10`);
+  return {
+    props: {
+      data,
+    },
+  };
 }
